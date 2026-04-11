@@ -53,9 +53,9 @@ final class TimerController: ObservableObject {
         entryDeadline = Date().addingTimeInterval(entry.duration)
         isRunning = true
 
-        // Open the associated link, if any
-        if let url = entry.link {
-            NSWorkspace.shared.open(url)
+        // Execute the associated shell command, if any
+        if let command = entry.command {
+            executeCommand(command)
         }
 
         SoundManager.shared.playStart()
@@ -95,5 +95,19 @@ final class TimerController: ObservableObject {
     private func cancelTimer() {
         timerTask?.invalidate()
         timerTask = nil
+    }
+
+    private func executeCommand(_ command: String) {
+        let process = Process()
+        process.launchPath = "/bin/sh"
+        process.arguments = ["-c", command]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        do {
+            try process.run()
+        } catch {
+            print("Failed to execute command: \(error)")
+        }
     }
 }

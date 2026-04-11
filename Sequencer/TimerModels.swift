@@ -6,13 +6,13 @@ struct TimerEntry: Identifiable, Codable {
     let id: UUID
     var title: String
     var duration: TimeInterval
-    var link: URL?
+    var command: String?
 
-    init(id: UUID = UUID(), title: String, duration: TimeInterval, link: URL? = nil) {
+    init(id: UUID = UUID(), title: String, duration: TimeInterval, command: String? = nil) {
         self.id = id
         self.title = title
         self.duration = duration
-        self.link = link
+        self.command = command
     }
 }
 
@@ -29,17 +29,21 @@ extension TimerEntry {
 
     /// Parse a single line into a TimerEntry, returning nil if no valid duration found.
     static func parseLine(_ line: String) -> TimerEntry? {
-        var tokens = line.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
-        guard !tokens.isEmpty else { return nil }
-
-        // Extract URL if present (first token that starts with http:// or https://)
-        var link: URL? = nil
-        if let urlIndex = tokens.firstIndex(where: {
-            $0.hasPrefix("http://") || $0.hasPrefix("https://")
-        }) {
-            link = URL(string: tokens[urlIndex])
-            tokens.remove(at: urlIndex)
+        // Extract shell command if present (wrapped in square brackets [cmd])
+        var command: String? = nil
+        var lineWithoutCommand = line
+        
+        if let matchRange = line.range(of: #"\[(.+?)\]"#, options: .regularExpression) {
+            let captured = String(line[matchRange])
+            // Extract content between brackets
+            let trimmed = captured.trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+            command = trimmed
+            // Remove the bracketed portion from the line for further parsing
+            lineWithoutCommand = line.replacingCharacters(in: matchRange, with: "")
         }
+        
+        var tokens = lineWithoutCommand.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        guard !tokens.isEmpty else { return nil }
 
         // Extract duration: search from the right for the first token matching the duration pattern
         var duration: TimeInterval? = nil
@@ -57,7 +61,7 @@ extension TimerEntry {
         return TimerEntry(
             title: title.isEmpty ? "Timer" : title,
             duration: duration,
-            link: link
+            command: command
         )
     }
 
