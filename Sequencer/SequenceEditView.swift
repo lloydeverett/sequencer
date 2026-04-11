@@ -60,23 +60,26 @@ struct SequenceEditView: View {
                 .onSubmit { commitRename(at: index) }
                 .onExitCommand { renamingIndex = nil }
         } else {
-            Text(store.sequences[index].name)
-                .font(.subheadline)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(isSelected ? Color.primary.opacity(0.12) : Color.clear)
-                .cornerRadius(4)
-                .contentShape(Rectangle())
-                .onTapGesture { store.selectedIndex = index }
-                // .onTapGesture(count: 2) { beginRename(at: index) }
-                .contextMenu {
-                    Button("Rename") { beginRename(at: index) }
-                    Divider()
-                    Button("Remove Tab", role: .destructive) {
-                        store.removeTab(at: index)
-                    }
-                    .disabled(store.sequences.count <= 1)
+            Button {
+                store.selectedIndex = index
+            } label: {
+                Text(store.sequences[index].name)
+                    .font(.subheadline)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(isSelected ? Color.primary.opacity(0.12) : Color.clear)
+                    .cornerRadius(4)
+            }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+            .contextMenu {
+                Button("Rename") { beginRename(at: index) }
+                Divider()
+                Button("Remove Tab", role: .destructive) {
+                    store.removeTab(at: index)
                 }
+                .disabled(store.sequences.count <= 1)
+            }
         }
     }
 
