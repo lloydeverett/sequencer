@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 // MARK: - Sequence edit view (idle state)
 
@@ -89,6 +90,10 @@ struct SequenceEditView: View {
                 }
                 .disabled(store.sequences.count <= 1)
             }
+            .onDrag {
+                NSItemProvider(object: String(index) as NSString)
+            }
+            .onDrop(of: [.utf8PlainText], delegate: TabDropDelegate(store: store, sourceIndex: index, selectedIndex: $selectedIndex))
         }
     }
 
@@ -153,5 +158,44 @@ struct SequenceEditView: View {
         let h = s / 3600
         let m = (s % 3600) / 60
         return m > 0 ? "\(h)h \(m)m" : "\(h)h"
+    }
+}
+
+// MARK: - Tab drop delegate
+
+struct TabDropDelegate: DropDelegate {
+    let store: SequenceStore
+    let sourceIndex: Int
+    @Binding var selectedIndex: Int
+
+    func dropEntered(info: DropInfo) {}
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard let provider = info.itemProviders(for: [.utf8PlainText]).first else {
+            return false
+        }
+
+        provider.loadItem(forTypeIdentifier: UTType.utf8PlainText.identifier, options: nil) { (item, error) in
+            if let data = item as? Data,
+               let string = String(data: data, encoding: .utf8),
+               let draggedIndex = Int(string) {
+                DispatchQueue.main.async {
+                    store.moveTab(from: draggedIndex, to: sourceIndex)
+                    // Update selectedIndex if the selected tab was moved
+                    if selectedIndex == draggedIndex {
+                        selectedIndex = sourceIndex
+                    } else if draggedIndex < sourceIndex && selectedIndex > draggedIndex && selectedIndex <= sourceIndex {
+                        selectedIndex -= 1
+                    } else if draggedIndex > sourceIndex && selectedIndex < draggedIndex && selectedIndex >= sourceIndex {
+                        selectedIndex += 1
+                    }
+                }
+            }
+        }
+        return true
     }
 }

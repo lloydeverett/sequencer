@@ -36,6 +36,14 @@ class SequenceStore: ObservableObject {
         sequences.remove(at: index)
     }
 
+    func moveTab(from source: Int, to destination: Int) {
+        guard source >= 0 && source < sequences.count else { return }
+        guard destination >= 0 && destination < sequences.count else { return }
+        guard source != destination else { return }
+        let sequence = sequences.remove(at: source)
+        sequences.insert(sequence, at: destination)
+    }
+
     // MARK: - Persistence
 
     private func save() {
