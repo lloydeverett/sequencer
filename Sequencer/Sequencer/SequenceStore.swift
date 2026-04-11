@@ -25,7 +25,7 @@ class SequenceStore: ObservableObject {
             ]
         }
         selectedIndex = UserDefaults.standard.integer(forKey: selectedKey)
-        if selectedIndex >= sequences.count { selectedIndex = 0 }
+        selectedIndex = min(max(selectedIndex, 0), max(sequences.count - 1, 0))
     }
 
     // MARK: - Convenience accessors

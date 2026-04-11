@@ -103,13 +103,12 @@ struct SequenceEditView: View {
                 .lineLimit(1)
             Spacer()
             Button {
-                let entries = store.selectedSequence.entries
                 controller.start(entries: entries)
             } label: {
                 Label("Start", systemImage: "play.fill")
             }
             .buttonStyle(.borderedProminent)
-            .disabled(store.selectedSequence.entries.isEmpty)
+            .disabled(entries.isEmpty)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

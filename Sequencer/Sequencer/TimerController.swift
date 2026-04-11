@@ -16,6 +16,8 @@ final class TimerController: ObservableObject {
 
     private var entries: [TimerEntry] = []
     private var timerTask: Timer?
+    /// The wall-clock deadline for the current entry to expire.
+    private var entryDeadline: Date = .distantFuture
 
     // MARK: - Public API
 
@@ -42,10 +44,13 @@ final class TimerController: ObservableObject {
             return
         }
 
+        cancelTimer()
+
         currentIndex = index
         let entry = entries[index]
         currentEntry = entry
         timeRemaining = entry.duration
+        entryDeadline = Date().addingTimeInterval(entry.duration)
         isRunning = true
 
         // Open the associated link, if any
@@ -55,17 +60,21 @@ final class TimerController: ObservableObject {
 
         SoundManager.shared.playStart()
 
-        cancelTimer()
-        timerTask = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        // Use a high-frequency timer and derive remaining time from the wall clock
+        // to avoid accumulated drift on long-running timers.
+        timerTask = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
             self?.tick()
         }
     }
 
     private func tick() {
-        guard timeRemaining > 0 else { return }
-        timeRemaining -= 1
-        if timeRemaining <= 0 {
+        let remaining = entryDeadline.timeIntervalSinceNow
+        if remaining <= 0 {
+            timeRemaining = 0
             entryFinished()
+        } else {
+            // Round up so the display shows e.g. "5" for the full fifth second.
+            timeRemaining = ceil(remaining)
         }
     }
 
