@@ -6,7 +6,7 @@ struct TimerRunningView: View {
     @ObservedObject var controller: TimerController
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 10) {
             Spacer()
 
             // Timer title
@@ -31,6 +31,18 @@ struct TimerRunningView: View {
             }
 
             Spacer()
+
+            if controller.hasNextEntry {
+                Button {
+                    controller.skipToNext()
+                } label: {
+                    Label("Skip", systemImage: "forward.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .padding(.horizontal)
+            }
 
             Button {
                 controller.stop()

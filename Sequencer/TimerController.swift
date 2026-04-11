@@ -12,6 +12,10 @@ final class TimerController: ObservableObject {
     @Published var currentIndex: Int = 0
     @Published var totalCount: Int = 0
 
+    var hasNextEntry: Bool {
+        isRunning && (currentIndex + 1) < totalCount
+    }
+
     // MARK: - Private
 
     private var entries: [TimerEntry] = []
@@ -34,6 +38,12 @@ final class TimerController: ObservableObject {
         isRunning = false
         currentEntry = nil
         timeRemaining = 0
+    }
+
+    func skipToNext() {
+        guard hasNextEntry else { return }
+        cancelTimer()
+        beginEntry(at: currentIndex + 1)
     }
 
     // MARK: - Private helpers
