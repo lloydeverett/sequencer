@@ -65,11 +65,11 @@ private extension SyntaxHighlightingEditor {
     )
 
     // Semantic colors — adapt automatically to light / dark mode
-    static let colorDefault  = NSColor.labelColor             // valid-line title text
-    static let colorComment  = NSColor.secondaryLabelColor    // // comment lines
-    static let colorInvalid  = NSColor.tertiaryLabelColor     // lines with no valid duration
-    static let colorDuration = NSColor.systemOrange           // duration tokens
-    static let colorCommand  = NSColor.systemCyan             // [command] blocks
+    static let colorDefault  = NSColor.labelColor                              // valid-line title text
+    static let colorInvalid  = NSColor.secondaryLabelColor                     // lines with no valid duration
+    static let colorComment  = NSColor.systemGreen.withAlphaComponent(0.8)     // // comment lines
+    static let colorDuration = NSColor.systemOrange                            // duration tokens
+    static let colorCommand  = NSColor.systemCyan                              // [command] blocks
 
     func applyHighlighting(to tv: NSTextView) {
         guard let storage = tv.textStorage else { return }
