@@ -68,7 +68,7 @@ struct SequenceEditView: View {
                 .cornerRadius(4)
                 .contentShape(Rectangle())
                 .onTapGesture { store.selectedIndex = index }
-                .onTapGesture(count: 2) { beginRename(at: index) }
+                // .onTapGesture(count: 2) { beginRename(at: index) }
                 .contextMenu {
                     Button("Rename") { beginRename(at: index) }
                     Divider()
