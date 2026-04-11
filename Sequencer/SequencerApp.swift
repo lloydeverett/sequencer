@@ -13,6 +13,7 @@ struct SequencerApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 300, height: 380)
+        .windowResizability(.contentMinSize)
         .commands {
             // Remove the "New Window" command — this is a single-window utility app
             CommandGroup(replacing: .newItem) {}

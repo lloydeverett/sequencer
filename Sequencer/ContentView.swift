@@ -11,8 +11,8 @@ struct ContentView: View {
                 SequenceEditView(controller: controller)
             }
         }
-        // Stretch to fill the window
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Constrain window size
+        .frame(minWidth: 200, maxWidth: .infinity,  minHeight: 250, maxHeight: .infinity)
         // Translucent material background that blurs whatever is behind the window
         .background(.ultraThinMaterial)
         // Wire up the window-level configuration once the view appears

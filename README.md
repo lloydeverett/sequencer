@@ -21,7 +21,7 @@ A lightweight macOS timer app built with SwiftUI.
 
 ## Building
 
-1. Open `Sequencer/Sequencer.xcodeproj` in **Xcode 15** or later.
+1. Open `Sequencer.xcodeproj` in **Xcode 15** or later.
 2. Select the **Sequencer** scheme and your Mac as the run destination.
 3. Press **⌘R** to build and run.
 
