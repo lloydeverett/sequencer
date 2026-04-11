@@ -23,7 +23,7 @@ extension TimerEntry {
     static func parseAll(from text: String) -> [TimerEntry] {
         text.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
+            .filter { !$0.isEmpty && !$0.hasPrefix("//") }
             .compactMap { parseLine($0) }
     }
 
