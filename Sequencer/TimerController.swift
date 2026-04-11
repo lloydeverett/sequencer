@@ -99,8 +99,8 @@ final class TimerController: ObservableObject {
 
     private func executeCommand(_ command: String) {
         let process = Process()
-        process.launchPath = "/bin/sh"
-        process.arguments = ["-c", command]
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        process.arguments = ["--login", "-c", "[ -f /etc/zshrc ] && . /etc/zshrc; [ -f ~/.zshrc ] && . ~/.zshrc;" + command]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = pipe
