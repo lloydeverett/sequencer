@@ -5,10 +5,15 @@ import SwiftUI
 struct SequenceEditView: View {
     @EnvironmentObject var store: SequenceStore
     @ObservedObject var controller: TimerController
+    @Binding var selectedIndex: Int
 
     /// Index of the tab being renamed; nil when not renaming.
     @State private var renamingIndex: Int? = nil
     @State private var renameText: String = ""
+
+    private var safeIndex: Int {
+        min(max(selectedIndex, 0), max(store.sequences.count - 1, 0))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,7 +36,7 @@ struct SequenceEditView: View {
 
                 // Add-tab button
                 Button {
-                    store.addTab()
+                    selectedIndex = store.addTab()
                 } label: {
                     Image(systemName: "plus")
                         .padding(.horizontal, 10)
@@ -45,7 +50,7 @@ struct SequenceEditView: View {
 
     @ViewBuilder
     private func tabButton(index: Int) -> some View {
-        let isSelected = store.selectedIndex == index
+        let isSelected = selectedIndex == index
 
         if renamingIndex == index {
             // Inline rename field
@@ -61,7 +66,7 @@ struct SequenceEditView: View {
                 .onExitCommand { renamingIndex = nil }
         } else {
             Button {
-                store.selectedIndex = index
+                selectedIndex = index
             } label: {
                 Text(store.sequences[index].name)
                     .font(.subheadline)
@@ -78,6 +83,9 @@ struct SequenceEditView: View {
                 Divider()
                 Button("Remove Tab", role: .destructive) {
                     store.removeTab(at: index)
+                    if selectedIndex >= store.sequences.count {
+                        selectedIndex = store.sequences.count - 1
+                    }
                 }
                 .disabled(store.sequences.count <= 1)
             }
@@ -88,8 +96,8 @@ struct SequenceEditView: View {
 
     private var editor: some View {
         TextEditor(text: Binding(
-            get: { store.selectedSequence.text },
-            set: { store.selectedSequence.text = $0 }
+            get: { store.sequences[safeIndex].text },
+            set: { store.sequences[safeIndex].text = $0 }
         ))
         .font(.system(.body, design: .monospaced))
         .scrollContentBackground(.hidden)
@@ -100,7 +108,7 @@ struct SequenceEditView: View {
 
     private var toolbar: some View {
         HStack {
-            let entries = store.selectedSequence.entries
+            let entries = store.sequences[safeIndex].entries
             Text(entrySummary(entries))
                 .font(.caption)
                 .foregroundStyle(.secondary)

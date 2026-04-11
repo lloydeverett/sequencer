@@ -6,12 +6,7 @@ class SequenceStore: ObservableObject {
         didSet { save() }
     }
 
-    @Published var selectedIndex: Int = 0 {
-        didSet { save() }
-    }
-
     private let sequencesKey = "sequencer.sequences"
-    private let selectedKey  = "sequencer.selectedIndex"
 
     init() {
         if let data = UserDefaults.standard.data(forKey: sequencesKey),
@@ -24,38 +19,21 @@ class SequenceStore: ObservableObject {
                 TimerSequence(name: "Tab 3", text: ""),
             ]
         }
-        selectedIndex = UserDefaults.standard.integer(forKey: selectedKey)
-        selectedIndex = min(max(selectedIndex, 0), max(sequences.count - 1, 0))
-    }
-
-    // MARK: - Convenience accessors
-
-    var selectedSequence: TimerSequence {
-        get {
-            guard !sequences.isEmpty else { return TimerSequence(name: "Tab 1") }
-            return sequences[clampedIndex]
-        }
-        set {
-            sequences[clampedIndex] = newValue
-        }
-    }
-
-    private var clampedIndex: Int {
-        min(max(selectedIndex, 0), sequences.count - 1)
     }
 
     // MARK: - Tab management
 
-    func addTab() {
+    /// Appends a new tab and returns its index.
+    @discardableResult
+    func addTab() -> Int {
         let number = sequences.count + 1
         sequences.append(TimerSequence(name: "Tab \(number)"))
-        selectedIndex = sequences.count - 1
+        return sequences.count - 1
     }
 
     func removeTab(at index: Int) {
         guard sequences.count > 1 else { return }
         sequences.remove(at: index)
-        if selectedIndex >= sequences.count { selectedIndex = sequences.count - 1 }
     }
 
     // MARK: - Persistence
@@ -64,6 +42,6 @@ class SequenceStore: ObservableObject {
         if let data = try? JSONEncoder().encode(sequences) {
             UserDefaults.standard.set(data, forKey: sequencesKey)
         }
-        UserDefaults.standard.set(selectedIndex, forKey: selectedKey)
+
     }
 }

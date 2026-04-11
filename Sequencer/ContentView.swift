@@ -1,14 +1,17 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var controller: TimerController
+    @EnvironmentObject var store: SequenceStore
+    @StateObject private var controller = TimerController()
+    /// Each window tracks its own selected tab.
+    @State private var selectedIndex: Int = 0
 
     var body: some View {
         Group {
             if controller.isRunning {
                 TimerRunningView(controller: controller)
             } else {
-                SequenceEditView(controller: controller)
+                SequenceEditView(controller: controller, selectedIndex: $selectedIndex)
             }
         }
         // Constrain window size
