@@ -67,10 +67,11 @@ struct SequenceEditView: View {
                     .font(.subheadline)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 7)
-                    .background(isSelected ? Color.primary.opacity(0.12) : Color.clear)
-                    .cornerRadius(4)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .background(isSelected ? Color.primary.opacity(0.12) : Color.primary.opacity(0.01))
+            .cornerRadius(4)
             .contentShape(Rectangle())
             .contextMenu {
                 Button("Rename") { beginRename(at: index) }
