@@ -16,6 +16,7 @@
 		AA0000000000000000000028 /* TimerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* TimerController.swift */; };
 		AA0000000000000000000029 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001F /* SoundManager.swift */; };
 		AA000000000000000000002A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000020 /* Assets.xcassets */; };
+		AA000000000000000000002D /* SyntaxHighlightingEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000002E /* SyntaxHighlightingEditor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		AA0000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0000000000000000000021 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA000000000000000000002C /* Sequencer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Sequencer.entitlements; sourceTree = "<group>"; };
+		AA000000000000000000002E /* SyntaxHighlightingEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlightingEditor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				AA000000000000000000001D /* SequenceStore.swift */,
 				AA000000000000000000001E /* TimerController.swift */,
 				AA000000000000000000001F /* SoundManager.swift */,
+				AA000000000000000000002E /* SyntaxHighlightingEditor.swift */,
 				AA0000000000000000000020 /* Assets.xcassets */,
 				AA0000000000000000000021 /* Info.plist */,
 				AA000000000000000000002C /* Sequencer.entitlements */,
@@ -155,6 +158,7 @@
 				AA0000000000000000000027 /* SequenceStore.swift in Sources */,
 				AA0000000000000000000028 /* TimerController.swift in Sources */,
 				AA0000000000000000000029 /* SoundManager.swift in Sources */,
+				AA000000000000000000002D /* SyntaxHighlightingEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

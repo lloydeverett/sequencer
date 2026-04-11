@@ -95,13 +95,10 @@ struct SequenceEditView: View {
     // MARK: - Text editor
 
     private var editor: some View {
-        TextEditor(text: Binding(
+        SyntaxHighlightingEditor(text: Binding(
             get: { store.sequences[safeIndex].text },
             set: { store.sequences[safeIndex].text = $0 }
         ))
-        .font(.system(.body, design: .monospaced))
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
     }
 
     // MARK: - Bottom toolbar
