@@ -20,6 +20,10 @@ struct ContentView: View {
         .background(.ultraThinMaterial)
         // Wire up the window-level configuration once the view appears
         .background(WindowConfigurator())
+        .sheet(item: $store.syncConflict) { conflict in
+            SyncConflictView(conflict: conflict)
+                .environmentObject(store)
+        }
     }
 }
 
