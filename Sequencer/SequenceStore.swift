@@ -11,6 +11,7 @@ class SequenceStore: ObservableObject {
 
     private let directoryPathKey = "sequencer.directoryPath"
     private let filename = "sequences.json"
+    private var saveTask: DispatchWorkItem?
 
     private var fileURL: URL { storageDirectory.appendingPathComponent(filename) }
 
@@ -57,7 +58,7 @@ class SequenceStore: ObservableObject {
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             UserDefaults.standard.set(url.path, forKey: directoryPathKey)
             storageDirectory = url
-            save()
+            save(immediate: true)
         }
     }
 
@@ -86,9 +87,19 @@ class SequenceStore: ObservableObject {
 
     // MARK: - Persistence
 
-    private func save() {
-        if let data = try? JSONEncoder().encode(sequences) {
-            try? data.write(to: fileURL, options: .atomic)
+    private func save(immediate: Bool = false) {
+        saveTask?.cancel()
+        let task = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            if let data = try? JSONEncoder().encode(self.sequences) {
+                try? data.write(to: self.fileURL, options: .atomic)
+            }
+        }
+        saveTask = task
+        if immediate {
+            DispatchQueue.global(qos: .utility).async(execute: task)
+        } else {
+            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 1.0, execute: task)
         }
     }
 }
