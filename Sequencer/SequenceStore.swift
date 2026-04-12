@@ -1,15 +1,36 @@
 import Foundation
 import Combine
+import AppKit
 
 class SequenceStore: ObservableObject {
     @Published var sequences: [TimerSequence] {
         didSet { save() }
     }
 
-    private let sequencesKey = "sequencer.sequences"
+    @Published private(set) var storageDirectory: URL
+
+    private let directoryPathKey = "sequencer.directoryPath"
+    private let filename = "sequences.json"
+
+    private var fileURL: URL { storageDirectory.appendingPathComponent(filename) }
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: sequencesKey),
+        let defaultDir = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Sequencer")
+
+        let dir: URL
+        if let saved = UserDefaults.standard.string(forKey: "sequencer.directoryPath") {
+            dir = URL(fileURLWithPath: saved)
+        } else {
+            dir = defaultDir
+        }
+
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        storageDirectory = dir
+
+        let fileURL = dir.appendingPathComponent("sequences.json")
+        if let data = try? Data(contentsOf: fileURL),
            let decoded = try? JSONDecoder().decode([TimerSequence].self, from: data) {
             sequences = decoded
         } else {
@@ -18,6 +39,25 @@ class SequenceStore: ObservableObject {
                 TimerSequence(name: "Tab 2", text: ""),
                 TimerSequence(name: "Tab 3", text: ""),
             ]
+        }
+    }
+
+    // MARK: - Directory selection
+
+    func openDirectoryPicker() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.prompt = "Select"
+        panel.message = "Choose a folder to store your sequences"
+        panel.directoryURL = storageDirectory
+
+        if panel.runModal() == .OK, let url = panel.url {
+            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+            UserDefaults.standard.set(url.path, forKey: directoryPathKey)
+            storageDirectory = url
+            save()
         }
     }
 
@@ -48,8 +88,7 @@ class SequenceStore: ObservableObject {
 
     private func save() {
         if let data = try? JSONEncoder().encode(sequences) {
-            UserDefaults.standard.set(data, forKey: sequencesKey)
+            try? data.write(to: fileURL, options: .atomic)
         }
-
     }
 }
