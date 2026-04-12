@@ -4,7 +4,10 @@ import AppKit
 
 class SequenceStore: ObservableObject {
     @Published var sequences: [TimerSequence] {
-        didSet { save() }
+        didSet {
+            guard !isLoadingFromDisk else { return }
+            save()
+        }
     }
 
     @Published private(set) var storageDirectory: URL
@@ -12,6 +15,9 @@ class SequenceStore: ObservableObject {
     private let directoryPathKey = "sequencer.directoryPath"
     private let filename = "sequences.json"
     private var saveTask: DispatchWorkItem?
+    private var monitorTimer: Timer?
+    private var lastWrittenModificationDate: Date?
+    private var isLoadingFromDisk = false
 
     private var fileURL: URL { storageDirectory.appendingPathComponent(filename) }
 
@@ -34,12 +40,54 @@ class SequenceStore: ObservableObject {
         if let data = try? Data(contentsOf: fileURL),
            let decoded = try? JSONDecoder().decode([TimerSequence].self, from: data) {
             sequences = decoded
+            lastWrittenModificationDate = try? FileManager.default
+                .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
         } else {
             sequences = [
                 TimerSequence(name: "Tab 1", text: "Work 25m\nBreak 5m"),
                 TimerSequence(name: "Tab 2", text: ""),
                 TimerSequence(name: "Tab 3", text: ""),
             ]
+        }
+        startMonitoring()
+    }
+
+    deinit {
+        stopMonitoring()
+    }
+
+    // MARK: - File monitoring
+
+    private func startMonitoring() {
+        stopMonitoring()
+        monitorTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { [weak self] _ in
+            self?.checkForExternalChanges()
+        }
+    }
+
+    private func stopMonitoring() {
+        monitorTimer?.invalidate()
+        monitorTimer = nil
+    }
+
+    private func checkForExternalChanges() {
+        let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path)
+        let fileModDate = attrs?[.modificationDate] as? Date
+
+        if let fileModDate, let lastWritten = lastWrittenModificationDate,
+           fileModDate > lastWritten {
+            reloadFromDisk()
+        }
+    }
+
+    private func reloadFromDisk() {
+        if let data = try? Data(contentsOf: fileURL),
+           let decoded = try? JSONDecoder().decode([TimerSequence].self, from: data) {
+            isLoadingFromDisk = true
+            sequences = decoded
+            isLoadingFromDisk = false
+            lastWrittenModificationDate = try? FileManager.default
+                .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
         }
     }
 
@@ -93,6 +141,8 @@ class SequenceStore: ObservableObject {
             guard let self else { return }
             if let data = try? JSONEncoder().encode(self.sequences) {
                 try? data.write(to: self.fileURL, options: .atomic)
+                self.lastWrittenModificationDate = try? FileManager.default
+                    .attributesOfItem(atPath: self.fileURL.path)[.modificationDate] as? Date
             }
         }
         saveTask = task
