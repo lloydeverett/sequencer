@@ -1,3 +1,4 @@
+- Clickable surface area for new tab button is wrong
 - iCloud sync
 - Select timer lines to run
 - Can we switch to Package.swift or something?
