@@ -44,7 +44,7 @@ class SequenceStore: ObservableObject {
                 .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
         } else {
             sequences = [
-                TimerSequence(name: "Tab 1", text: "Work 25m\nBreak 5m"),
+                TimerSequence(name: "Tab 1", text: "25m Work\n5m  Break"),
                 TimerSequence(name: "Tab 2", text: ""),
                 TimerSequence(name: "Tab 3", text: ""),
             ]
