@@ -3,6 +3,12 @@ import Combine
 import AppKit
 
 class SequenceStore: ObservableObject {
+    private static let defaultSequences: [TimerSequence] = [
+        TimerSequence(name: "Tab 1", text: "25m Work\n5m  Break"),
+        TimerSequence(name: "Tab 2", text: ""),
+        TimerSequence(name: "Tab 3", text: ""),
+    ]
+
     @Published var sequences: [TimerSequence] {
         didSet {
             guard !isLoadingFromDisk else { return }
@@ -36,18 +42,13 @@ class SequenceStore: ObservableObject {
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         storageDirectory = dir
 
-        let fileURL = dir.appendingPathComponent("sequences.json")
-        if let data = try? Data(contentsOf: fileURL),
-           let decoded = try? JSONDecoder().decode([TimerSequence].self, from: data) {
+        let fileURL = dir.appendingPathComponent(filename)
+        if let decoded = Self.decodedSequences(from: fileURL) {
             sequences = decoded
             lastWrittenModificationDate = try? FileManager.default
                 .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
         } else {
-            sequences = [
-                TimerSequence(name: "Tab 1", text: "25m Work\n5m  Break"),
-                TimerSequence(name: "Tab 2", text: ""),
-                TimerSequence(name: "Tab 3", text: ""),
-            ]
+            sequences = Self.defaultSequences
         }
         startMonitoring()
     }
@@ -81,14 +82,35 @@ class SequenceStore: ObservableObject {
     }
 
     private func reloadFromDisk() {
-        if let data = try? Data(contentsOf: fileURL),
-           let decoded = try? JSONDecoder().decode([TimerSequence].self, from: data) {
+        if let decoded = Self.decodedSequences(from: fileURL) {
             isLoadingFromDisk = true
             sequences = decoded
             isLoadingFromDisk = false
             lastWrittenModificationDate = try? FileManager.default
                 .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
         }
+    }
+
+    private static func decodedSequences(from url: URL) -> [TimerSequence]? {
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        guard !data.isEmpty else { return nil }
+        return try? JSONDecoder().decode([TimerSequence].self, from: data)
+    }
+
+    private func loadFromSelectedDirectoryOrInitializeDefaults() {
+        if let decoded = Self.decodedSequences(from: fileURL) {
+            isLoadingFromDisk = true
+            sequences = decoded
+            isLoadingFromDisk = false
+            lastWrittenModificationDate = try? FileManager.default
+                .attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
+            return
+        }
+
+        isLoadingFromDisk = true
+        sequences = Self.defaultSequences
+        isLoadingFromDisk = false
+        save(immediate: true)
     }
 
     // MARK: - Directory selection
@@ -106,7 +128,7 @@ class SequenceStore: ObservableObject {
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             UserDefaults.standard.set(url.path, forKey: directoryPathKey)
             storageDirectory = url
-            save(immediate: true)
+            loadFromSelectedDirectoryOrInitializeDefaults()
         }
     }
 
